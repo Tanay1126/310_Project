@@ -1,19 +1,22 @@
 from fastapi import FastAPI
+from app.schemas import Restaurant
 
-app = FastAPI(title="Restaurant API", version="1.0")
+app = FastAPI()
 
-#Health Check Endpoint
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
+# temporary test data for restaurants
+restaurants = [
+    Restaurant(id=1, name="test restaurant 1", cuisine="Italian", description="test desc 1", rating=4.5),
+    Restaurant(id=2, name="test restaurant 2", cuisine="Japanese", description="test desc 2", rating=4.7)
+]
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
 
-#Restaurant List Endpoint
-@app.get("/restaurants")
+@app.get("/restaurants/", response_model=list[Restaurant])
 def get_restaurants():
-    restaurants = [
-        {"id": 1, "name": "Sushi Place", "cuisine": "Japanese", "rating": 4.7},
-        {"id": 2, "name": "Pasta House", "cuisine": "Italian", "rating": 4.5},
-        {"id": 3, "name": "Burger Town", "cuisine": "American", "rating": 4.2},
-    ]
-    return {"restaurants": restaurants}
+    return restaurants
+
+@app.get("/restaurants/{id}", response_model=Restaurant)
+def read_restaurant(id: int):
+    return restaurants[id]
