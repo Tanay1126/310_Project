@@ -1,13 +1,10 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.api.routes.restaurants import router as restaurants_router
 
+app = FastAPI()
+app.include_router(restaurants_router)
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
