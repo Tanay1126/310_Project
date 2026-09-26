@@ -8,3 +8,7 @@ app.include_router(restaurants_router)
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+@app.get("/health/")
+def health_check():
+    return {"status": "healthy"}

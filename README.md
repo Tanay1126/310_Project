@@ -23,8 +23,13 @@ python3.14 -m venv .venv
 source .venv/bin/activate
 ```
 
+Dependency installation:
+From the repository root, with the virtual enviroment active:
 
-Run the application
+pip install fastapi pytest uvicorn
+
+
+Run the application:
 From the repository root, with the virtual environment active:
 
 python -m uvicorn app.main:app --reload
@@ -32,19 +37,18 @@ python -m uvicorn app.main:app --reload
 
 The API is available at `http://127.0.0.1:8000`. Interactive Swagger documentation is at [`/docs`](http://127.0.0.1:8000/docs).
 
-API endpoints
+API endpoints:
 `GET/`-> Health 
 `GET/restaurants/` -> List restaurants 
  `GET/restaurants/{restaurant_id}` -> Get a restaurant by ID; returns 404 if it does not exist 
 
-Representative data
+Representative data:
 Restaurant records are stored in [`data/restaurants.json`](data/restaurants.json). Each record has an ID, name, cuisine, description, and rating.
 
-Tests
+Tests:
+From the repository root, the command to run tests is:
 
-The command to run tests is
-
-pytest
+python -m pytest
 
 Repository structure
 ```text
@@ -56,8 +60,10 @@ app/
 	schemas.py       ( Pydantic)
 data/
 	restaurants.json  (Representative restaurant records)
+tests/
 scrum/
-	team-agreement.md Team agreement
+	team-agreement.md (Team agreement)
 pyproject.toml      (Project requirements)
 requirements.txt    (Pinned dependency list)
+README.md
 ```
