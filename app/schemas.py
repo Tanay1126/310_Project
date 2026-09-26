@@ -1,9 +1,8 @@
 from pydantic import BaseModel
 
-
 class Restaurant(BaseModel):
     id: int
     name: str
-    cuisine: str
-    description: str
-    rating: float
+    cuisine: str | None = None
+    description: str | None = None
+    rating: float | None = None
