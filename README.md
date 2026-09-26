@@ -45,7 +45,7 @@ API endpoints
 Representative data
 Restaurant records are stored in [`data/restaurants.json`](data/restaurants.json). Each record has an ID, name, cuisine, description, and rating.
 
-Tests
+Tests:
 From the repository root, the command to run tests is:
 
 python -m pytest
