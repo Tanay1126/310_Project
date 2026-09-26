@@ -37,12 +37,12 @@ python -m uvicorn app.main:app --reload
 
 The API is available at `http://127.0.0.1:8000`. Interactive Swagger documentation is at [`/docs`](http://127.0.0.1:8000/docs).
 
-API endpoints
+API endpoints:
 `GET/`-> Health 
 `GET/restaurants/` -> List restaurants 
  `GET/restaurants/{restaurant_id}` -> Get a restaurant by ID; returns 404 if it does not exist 
 
-Representative data
+Representative data:
 Restaurant records are stored in [`data/restaurants.json`](data/restaurants.json). Each record has an ID, name, cuisine, description, and rating.
 
 Tests:
