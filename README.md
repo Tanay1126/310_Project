@@ -42,9 +42,9 @@ Restaurant records are stored in [`data/restaurants.json`](data/restaurants.json
 
 Tests
 
+The command to run tests is
 
-sh
-python -m pytest
+pytest
 
 Repository structure
 ```text
