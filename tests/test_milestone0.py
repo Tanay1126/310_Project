@@ -23,5 +23,5 @@ def test_get_health():
     assert response.status_code == 200
 
 def test_restaurant_list():
-    assert isinstance(read_restaurants(), list)
+    assert isinstance(read_restaurants(), list) == True
     assert read_restaurants()[0]["id"] == 1
