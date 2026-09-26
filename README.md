@@ -23,6 +23,11 @@ python3.14 -m venv .venv
 source .venv/bin/activate
 ```
 
+Dependency installation
+From the repository root, with the virtual enviroment active:
+
+pip install fastapi pytest uvicorn
+
 
 Run the application
 From the repository root, with the virtual environment active:
@@ -41,9 +46,8 @@ Representative data
 Restaurant records are stored in [`data/restaurants.json`](data/restaurants.json). Each record has an ID, name, cuisine, description, and rating.
 
 Tests
+From the repository root, the command to run tests is:
 
-
-sh
 python -m pytest
 
 Repository structure
@@ -56,8 +60,10 @@ app/
 	schemas.py       ( Pydantic)
 data/
 	restaurants.json  (Representative restaurant records)
+tests/
 scrum/
-	team-agreement.md Team agreement
+	team-agreement.md (Team agreement)
 pyproject.toml      (Project requirements)
 requirements.txt    (Pinned dependency list)
+README.md
 ```
