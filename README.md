@@ -23,13 +23,13 @@ python3.14 -m venv .venv
 source .venv/bin/activate
 ```
 
-Dependency installation
+Dependency installation:
 From the repository root, with the virtual enviroment active:
 
 pip install fastapi pytest uvicorn
 
 
-Run the application
+Run the application:
 From the repository root, with the virtual environment active:
 
 python -m uvicorn app.main:app --reload
