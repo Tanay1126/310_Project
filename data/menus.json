@@ -1,0 +1,10 @@
+[
+    {"restaurant_id": 1, "id": 11, "name": "food menu"},
+    {"restaurant_id": 1, "id": 12, "name": "drinks menu"},
+
+    {"restaurant_id": 2, "id": 21, "name": "food menu"},
+    {"restaurant_id": 2, "id": 22, "name": "drinks menu"},
+    
+    {"restaurant_id": 3, "id": 31, "name": "food menu"},
+    {"restaurant_id": 3, "id": 32, "name": "drinks menu"}
+]

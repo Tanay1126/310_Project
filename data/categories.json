@@ -1,0 +1,10 @@
+[
+    {"menu_id": 11, "id": 111, "name": "Desserts"},
+    {"menu_id": 12, "id": 121, "name": "Soft Drinks"},
+
+    {"menu_id": 21, "id": 211, "name": "Appetizers"},
+    {"menu_id": 22, "id": 221, "name": "Alcohol"},
+
+    {"menu_id": 31, "id": 311, "name": "Main"},
+    {"menu_id": 32, "id": 321, "name": "Hot Drinks"}
+]
