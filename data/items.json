@@ -1,0 +1,10 @@
+[
+    {"category_id": 111, "id": 1111, "name": "Mochi", "price": 5.40},
+    {"category_id": 121, "id": 1211, "name": "Coke", "price": 1.20},
+
+    {"category_id": 211, "id": 2111, "name": "Arancini", "price": 7.50},
+    {"category_id": 221, "id": 2211, "name": "Vermouth", "price": 3.30},
+
+    {"category_id": 311, "id": 3111, "name": "Steak", "price": 10.80},
+    {"category_id": 321, "id": 3211, "name": "Coffee", "price": 1.50}
+]
