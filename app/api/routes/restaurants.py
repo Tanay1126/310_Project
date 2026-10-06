@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas import Restaurant
-from app.services.restaurant_service import get_restaurant, list_restaurants
+from app.schemas import Restaurant, Menu
+from app.services.restaurant_service import get_restaurant, list_restaurants, get_menus
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
@@ -20,3 +20,10 @@ def read_restaurant(id: int) -> Restaurant:
     if restaurant is None:
         raise HTTPException(status_code=404, detail="Restaurant not found")
     return restaurant
+
+@router.get("/{id}/menus", response_model=list[Menu])
+def read_menus(id: int) -> list[Menu]:
+    menus = get_menus(id)
+    if not menus:
+        raise HTTPException(status_code=404, detail="Menus not found")
+    return menus
