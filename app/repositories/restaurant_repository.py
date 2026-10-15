@@ -13,6 +13,17 @@ def read_restaurants(data_file: Path = restaurant_file) -> list[dict[str, Any]]:
     with data_file.open(encoding="utf-8") as file:
         return json.load(file)
 
+
+def create_restaurant(record: dict[str, Any], data_file: Path = restaurant_file) -> dict[str, Any]:
+    restaurants = read_restaurants(data_file)
+    record_with_id = {"id": max((item["id"] for item in restaurants), default=0) + 1, **record}
+    restaurants.append(record_with_id)
+    with data_file.open("w", encoding="utf-8") as file:
+        json.dump(restaurants, file, ensure_ascii=False, indent=2)
+        file.write("\n")
+    return record_with_id
+
+
 def read_menus(data_file: Path = menu_file) -> list[dict[str, Any]]:
     with data_file.open(encoding="utf-8") as file:
         return json.load(file)
