@@ -71,7 +71,6 @@ def create_restaurant(payload: RestaurantCreate) -> Restaurant:
     write_restaurants(records)
     return restaurant
 
-
 def update_restaurant(restaurant_id: int, changes: dict[str, object]) -> Restaurant | None:
     records = read_restaurants()
     for record in records:
@@ -110,7 +109,6 @@ def get_menus(restaurant_id: int) -> list[Menu]:
 
     return menus
 
-
 def get_menu_items(restaurant_id: int) -> list[MenuItem]:
     return [
         item
@@ -118,7 +116,6 @@ def get_menu_items(restaurant_id: int) -> list[MenuItem]:
         for category in menu.categories or []
         for item in category.items or []
     ]
-
 
 def create_menu_item(
     restaurant_id: int, payload: MenuItemCreate
@@ -144,7 +141,6 @@ def create_menu_item(
     write_items(records)
     return item
 
-
 def update_menu_item(
     restaurant_id: int, item_id: int, changes: dict[str, object]
 ) -> MenuItem | None:
@@ -159,7 +155,6 @@ def update_menu_item(
             write_items(records)
             return MenuItem.model_validate(record)
     return None
-
 
 def get_menu(restaurant_id: int, menu_id: int) -> Menu | None:
     return next((menu for menu in get_menus(restaurant_id) if menu.id == menu_id), None)
