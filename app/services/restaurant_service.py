@@ -1,5 +1,6 @@
+from app.repositories.restaurant_repository import create_restaurant as save_restaurant
 from app.repositories.restaurant_repository import read_restaurants, read_menus, read_categories, read_items
-from app.schemas import Restaurant, Menu, MenuCategory, MenuItem
+from app.schemas import Restaurant, RestaurantCreate, Menu, MenuCategory, MenuItem
 
 
 def list_restaurants() -> list[Restaurant]:
@@ -11,6 +12,11 @@ def get_restaurant(restaurant_id: int) -> Restaurant | None:
         (restaurant for restaurant in list_restaurants() if restaurant.id == restaurant_id),
         None,
     )
+
+
+def create_restaurant(restaurant: RestaurantCreate) -> Restaurant:
+    record = save_restaurant(restaurant.model_dump(exclude_none=True))
+    return Restaurant.model_validate(record)
 
 
 def get_menus(restaurant_id: int) -> list[Menu]:
