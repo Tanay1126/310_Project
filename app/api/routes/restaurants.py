@@ -36,6 +36,7 @@ def read_restaurants(
     min_rating: float | None = Query(default=None, ge=0, le=5),
     max_rating: float | None = Query(default=None, ge=0, le=5),
 ) -> list[Restaurant]:
+    # Reject contradictory rating bounds before filtering.
     if min_rating is not None and max_rating is not None and min_rating > max_rating:
         raise HTTPException(status_code=422, detail="min_rating cannot exceed max_rating")
     return list_restaurants(q, cuisine, min_rating, max_rating)
@@ -58,6 +59,7 @@ def read_restaurant(id: int) -> Restaurant:
 @router.put("/{id}", response_model=Restaurant)
 def update_restaurant_record(id: int, payload: RestaurantUpdate) -> Restaurant:
     changes = payload.model_dump(exclude_unset=True)
+    # PATCH fields omitted by the caller are not included in changes.
     if any(changes.get(field) is None for field in ("name",) if field in changes):
         raise HTTPException(status_code=422, detail="name cannot be null")
     restaurant = update_restaurant(id, changes)

@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+# Store JSON files in the repository's data directory.
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
 restaurant_file = DATA_DIR / "restaurants.json"
@@ -9,6 +10,8 @@ menu_file = DATA_DIR / "menus.json"
 category_file = DATA_DIR / "categories.json"
 item_file = DATA_DIR / "items.json"
 
+
+#Straightforward JSON Read/Write operations
 
 def _read_records(data_file: Path) -> list[dict[str, Any]]:
     with data_file.open(encoding="utf-8") as file:

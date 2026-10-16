@@ -22,6 +22,7 @@ def list_restaurants(
     min_rating: float | None = None,
     max_rating: float | None = None,
 ) -> list[Restaurant]:
+    # Load records,then apply the requested search and rating filters.
     restaurants = [Restaurant.model_validate(record) for record in read_restaurants()]
     if query:
         search = query.casefold()
@@ -55,6 +56,7 @@ def list_restaurants(
 
 
 def get_restaurant(restaurant_id: int) -> Restaurant | None:
+    # Return the matching restaurant, or None when DNE.
     return next(
         (restaurant for restaurant in list_restaurants() if restaurant.id == restaurant_id),
         None,
@@ -62,6 +64,7 @@ def get_restaurant(restaurant_id: int) -> Restaurant | None:
 
 
 def create_restaurant(payload: RestaurantCreate) -> Restaurant:
+    # Assign the next ID and retain the new restaurant.
     records = read_restaurants()
     restaurant = Restaurant(
         id=max((record["id"] for record in records), default=0) + 1,
@@ -71,7 +74,9 @@ def create_restaurant(payload: RestaurantCreate) -> Restaurant:
     write_restaurants(records)
     return restaurant
 
+
 def update_restaurant(restaurant_id: int, changes: dict[str, object]) -> Restaurant | None:
+    # Persist supplied fields for the matching restaurant.
     records = read_restaurants()
     for record in records:
         if record["id"] == restaurant_id:
@@ -82,6 +87,7 @@ def update_restaurant(restaurant_id: int, changes: dict[str, object]) -> Restaur
 
 
 def get_menus(restaurant_id: int) -> list[Menu]:
+    # Assemble menus with their categories and items for restaurant
     menus = [
         Menu.model_validate(menu)
         for menu in read_menus()
@@ -109,7 +115,9 @@ def get_menus(restaurant_id: int) -> list[Menu]:
 
     return menus
 
+
 def get_menu_items(restaurant_id: int) -> list[MenuItem]:
+    # Flatten/ Shrink items in restaurant categories
     return [
         item
         for menu in get_menus(restaurant_id)
@@ -117,9 +125,11 @@ def get_menu_items(restaurant_id: int) -> list[MenuItem]:
         for item in category.items or []
     ]
 
+
 def create_menu_item(
     restaurant_id: int, payload: MenuItemCreate
 ) -> MenuItem | None:
+    # Only add an item when its category belongs to this restaurant.
     category = next(
         (
             category
@@ -141,9 +151,11 @@ def create_menu_item(
     write_items(records)
     return item
 
+
 def update_menu_item(
     restaurant_id: int, item_id: int, changes: dict[str, object]
 ) -> MenuItem | None:
+    # Verify the item belongs to this restaurant before updating.
     item_ids = {item.id for item in get_menu_items(restaurant_id)}
     if item_id not in item_ids:
         return None
@@ -156,5 +168,7 @@ def update_menu_item(
             return MenuItem.model_validate(record)
     return None
 
+
 def get_menu(restaurant_id: int, menu_id: int) -> Menu | None:
+    # Find one menu within the restaurant's assembled menus
     return next((menu for menu in get_menus(restaurant_id) if menu.id == menu_id), None)

@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 
+# Request and response models for the restaurant API.
 class Restaurant(BaseModel):
     id: int
     name: str
