@@ -25,6 +25,48 @@ class RestaurantCreate(BaseModel):
         return name
 
 
+class RestaurantUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    cuisine: str | None = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    rating: float | None = Field(default=None, ge=0, le=5)
+
+    @field_validator("name")
+    @classmethod
+    def name_must_not_be_blank(cls, value: str | None) -> str | None:
+        if value is None:
+            raise ValueError("Name must not be null")
+        name = value.strip()
+        if not name:
+            raise ValueError("Name must not be blank")
+        return name
+
+
+class MenuItemCreate(BaseModel):
+    category_id: int
+    name: str = Field(min_length=1, max_length=100)
+    price: float = Field(ge=0)
+    description: str | None = None
+    ingredients: list[str] | None = None
+
+
+class MenuItemUpdate(BaseModel):
+    category_id: int | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    price: float | None = Field(default=None, ge=0)
+    description: str | None = None
+    ingredients: list[str] | None = None
+
+    @field_validator("category_id", "name", "price")
+    @classmethod
+    def required_fields_must_not_be_null(
+        cls, value: int | str | float | None
+    ) -> int | str | float | None:
+        if value is None:
+            raise ValueError("This field must not be null")
+        return value
+
+
 class MenuItem(BaseModel):
     category_id: int
     id: int
@@ -45,6 +87,5 @@ class Menu(BaseModel):
     id: int
     name: str
     categories: list[MenuCategory] | None = None
-
 
 
