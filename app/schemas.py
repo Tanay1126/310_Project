@@ -24,13 +24,6 @@ class RestaurantCreate(BaseModel):
             raise ValueError("Name must not be blank")
         return name
 
-class MenuCategory(BaseModel):
-    menu_id: int
-    id: int
-    name: str
-    description: str | None = None
-    items: list[MenuItem] | None = None
-
 
 class MenuItem(BaseModel):
     category_id: int
@@ -40,7 +33,12 @@ class MenuItem(BaseModel):
     description: str | None = None
     ingredients: list[str] | None = None
 
-    
+class MenuCategory(BaseModel):
+    menu_id: int
+    id: int
+    name: str
+    description: str | None = None
+    items: list[MenuItem] | None = None    
 
 class Menu(BaseModel):
     restaurant_id: int
