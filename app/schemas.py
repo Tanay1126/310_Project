@@ -18,6 +18,7 @@ class RestaurantCreate(BaseModel):
     @field_validator("name")
     @classmethod
     def name_must_not_be_blank(cls, value: str) -> str:
+        # Reject whitespace-only names before saving.
         name = value.strip()
         if not name:
             raise ValueError("Name must not be blank")
