@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 
 class Restaurant(BaseModel):
@@ -7,6 +7,22 @@ class Restaurant(BaseModel):
     cuisine: str | None = None
     description: str | None = None
     rating: float | None = None
+
+
+class RestaurantCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    cuisine: str | None = Field(default=None, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    rating: float | None = Field(default=None, ge=0, le=5)
+
+    @field_validator("name")
+    @classmethod
+    def name_must_not_be_blank(cls, value: str) -> str:
+        name = value.strip()
+        if not name:
+            raise ValueError("Name must not be blank")
+        return name
+
 
 class Menu(BaseModel):
     restaurant_id: int

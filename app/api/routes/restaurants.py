@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 
-from app.schemas import Restaurant, Menu
-from app.services.restaurant_service import get_restaurant, list_restaurants, get_menus
+from app.schemas import Restaurant, RestaurantCreate, Menu
+from app.services.restaurant_service import create_restaurant, get_restaurant, list_restaurants, get_menus
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
@@ -13,6 +13,12 @@ def check_health():
 @router.get("/", response_model=list[Restaurant])
 def read_restaurants() -> list[Restaurant]:
     return list_restaurants()
+
+
+@router.post("/", response_model=Restaurant, status_code=status.HTTP_201_CREATED)
+def add_restaurant(restaurant: RestaurantCreate) -> Restaurant:
+    return create_restaurant(restaurant)
+
 
 @router.get("/{id}", response_model=Restaurant)
 def read_restaurant(id: int) -> Restaurant:
