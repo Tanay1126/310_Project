@@ -4,7 +4,7 @@ from typing import Any
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
-# Keep JSON file locations and access in the repository, not in route handlers.
+# JSON file locations and access in the repository, not in route handlers.
 restaurant_file = DATA_DIR / "restaurants.json"
 menu_file = DATA_DIR / "menus.json"
 category_file = DATA_DIR / "categories.json"
@@ -17,7 +17,7 @@ def read_restaurants(data_file: Path = restaurant_file) -> list[dict[str, Any]]:
 
 def create_restaurant(record: dict[str, Any], data_file: Path = restaurant_file) -> dict[str, Any]:
     restaurants = read_restaurants(data_file)
-    # Assign one more than the current highest ID; use 1 when the file is empty.
+    # Use 1 when the file is empty and Assign one more than the current highest ID.
     record_with_id = {"id": max((item["id"] for item in restaurants), default=0) + 1, **record}
     restaurants.append(record_with_id)
     with data_file.open("w", encoding="utf-8") as file:
