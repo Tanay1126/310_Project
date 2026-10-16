@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 
 
+# Request and response models for the restaurant API.
 class Restaurant(BaseModel):
     id: int
     name: str
@@ -10,25 +11,24 @@ class Restaurant(BaseModel):
 
 
 class RestaurantCreate(BaseModel):
-    name: str = Field(min_length=1, max_length=100)
-    cuisine: str | None = Field(default=None, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
-    rating: float | None = Field(default=None, ge=0, le=5)
+    name: str
+    cuisine: str | None = None
+    description: str | None = None
+    rating: float | None = None
 
-    @field_validator("name")
-    @classmethod
-    def name_must_not_be_blank(cls, value: str) -> str:
-        name = value.strip()
-        if not name:
-            raise ValueError("Name must not be blank")
-        return name
 
+class RestaurantUpdate(BaseModel):
+    name: str | None = None
+    cuisine: str | None = None
+    description: str | None = None
+    rating: float | None = None
 
 class Menu(BaseModel):
     restaurant_id: int
     id: int
     name: str
     categories: list[MenuCategory] | None = None
+
 
 class MenuCategory(BaseModel):
     menu_id: int
@@ -37,10 +37,26 @@ class MenuCategory(BaseModel):
     description: str | None = None
     items: list[MenuItem] | None = None
 
+
 class MenuItem(BaseModel):
     category_id: int
     id: int
     name: str
     price: float
+    description: str | None = None
+    ingredients: list[str] | None = None
+
+
+class MenuItemCreate(BaseModel):
+    category_id: int
+    name: str
+    price: float
+    description: str | None = None
+    ingredients: list[str] | None = None
+
+
+class MenuItemUpdate(BaseModel):
+    name: str | None = None
+    price: float | None = None
     description: str | None = None
     ingredients: list[str] | None = None

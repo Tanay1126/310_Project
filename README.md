@@ -38,15 +38,22 @@ python -m uvicorn app.main:app --reload
 The frontend and API are available at `http://127.0.0.1:8000`. Interactive Swagger documentation is at [`/docs`](http://127.0.0.1:8000/docs).
 
 API endpoints:
-`GET/` -> Restaurant directory frontend
-`GET/health/` -> Health
-`GET/restaurants/` -> List restaurants
-`POST/restaurants/` -> Create a restaurant (name, cuisine, description, and optional rating)
-`GET/restaurants/{restaurant_id}` -> Get a restaurant by ID; returns 404 if it does not exist
-`GET/restaurants/{restaurant_id}/menus` -> Get the restaurant's menus and items
+`GET /` and `GET /health/` -> Health checks
+`GET /restaurants/` -> List restaurants; supports `q`, `cuisine`, `min_rating`, and `max_rating` filters
+`POST /restaurants/` -> Create a restaurant
+`GET /restaurants/{restaurant_id}` -> Get a restaurant by ID
+`PUT/PATCH /restaurants/{restaurant_id}` -> Update restaurant information
+`GET /restaurants/{restaurant_id}/menus` -> Get a restaurant's menus, categories, and menu items
+`GET /restaurants/{restaurant_id}/menus/{menu_id}` -> Get one menu
+`GET /restaurants/{restaurant_id}/menus/{menu_id}/items` -> List items on a menu
+`GET /restaurants/{restaurant_id}/menu-items` -> List all menu items for a restaurant
+`GET /restaurants/{restaurant_id}/menu-items/{item_id}` -> Get one menu item
+`POST /restaurants/{restaurant_id}/menu-items` -> Add a menu item (provide its `category_id`)
+`PUT/PATCH /restaurants/{restaurant_id}/menu-items/{item_id}` -> Update menu item information
 
 Representative data:
 Restaurant records are stored in [`data/restaurants.json`](data/restaurants.json). Each record has an ID, name, cuisine, description, and rating.
+Restaurant and menu-item create/update operations are persisted to the corresponding JSON files in `data/`.
 
 Tests:
 From the repository root, the command to run tests is:
