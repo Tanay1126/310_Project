@@ -11,17 +11,22 @@ client = TestClient(app)
 
 
 @pytest.fixture
-def isolated_data(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def isolated_data(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[Path, bytes]:
     source_data = Path(__file__).resolve().parents[1] / "data"
+    source_restaurant_path = source_data / "restaurants.json"
+    original_restaurant_data = source_restaurant_path.read_bytes()
     restaurant_path = tmp_path / "restaurants.json"
     item_path = tmp_path / "items.json"
-    restaurant_path.write_bytes((source_data / "restaurants.json").read_bytes())
+    restaurant_path.write_bytes(original_restaurant_data)
     item_path.write_bytes((source_data / "items.json").read_bytes())
     monkeypatch.setattr(repositories.restaurant_repository, "restaurant_file", restaurant_path)
     monkeypatch.setattr(repositories.restaurant_repository, "item_file", item_path)
+    return source_restaurant_path, original_restaurant_data
 
 
-def test_restaurant_search_and_filters(isolated_data: None) -> None:
+def test_restaurant_search_and_filters(isolated_data: tuple[Path, bytes]) -> None:
     response = client.get("/restaurants/", params={"q": "sushi", "cuisine": "japan"})
     assert response.status_code == 200
     assert [restaurant["id"] for restaurant in response.json()] == [1]
@@ -31,7 +36,7 @@ def test_restaurant_search_and_filters(isolated_data: None) -> None:
     assert [restaurant["id"] for restaurant in response.json()] == [1, 2]
 
 
-def test_read_menu_and_its_items(isolated_data: None) -> None:
+def test_read_menu_and_its_items(isolated_data: tuple[Path, bytes]) -> None:
     response = client.get("/restaurants/1/menus/11")
     assert response.status_code == 200
     assert response.json()["categories"][0]["items"][0]["name"] == "Mochi"
@@ -41,7 +46,10 @@ def test_read_menu_and_its_items(isolated_data: None) -> None:
     assert [item["id"] for item in response.json()] == [1111]
 
 
-def test_create_and_update_restaurant(isolated_data: None) -> None:
+def test_create_and_update_restaurant(
+    isolated_data: tuple[Path, bytes],
+) -> None:
+    source_restaurant_path, original_restaurant_data = isolated_data
     response = client.post(
         "/restaurants/",
         json={"name": "New Bistro", "cuisine": "French", "rating": 4.8},
@@ -59,9 +67,10 @@ def test_create_and_update_restaurant(isolated_data: None) -> None:
 
     records = json.loads(repositories.restaurant_repository.restaurant_file.read_text())
     assert records[-1]["id"] == restaurant_id
+    assert source_restaurant_path.read_bytes() == original_restaurant_data
 
 
-def test_create_read_and_update_menu_item(isolated_data: None) -> None:
+def test_create_read_and_update_menu_item(isolated_data: tuple[Path, bytes]) -> None:
     response = client.post(
         "/restaurants/1/menu-items",
         json={"category_id": 111, "name": "Dorayaki", "price": 4.25},
