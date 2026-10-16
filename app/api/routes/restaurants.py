@@ -47,6 +47,12 @@ def create_restaurant_record(payload: RestaurantCreate) -> Restaurant:
     return create_restaurant(payload)
 
 
+
+@router.post("/", response_model=Restaurant, status_code=status.HTTP_201_CREATED)
+def add_restaurant(restaurant: RestaurantCreate) -> Restaurant:
+    return create_restaurant(restaurant)
+
+
 @router.get("/{id}", response_model=Restaurant)
 def read_restaurant(id: int) -> Restaurant:
     restaurant = get_restaurant(id)

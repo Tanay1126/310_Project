@@ -35,7 +35,7 @@ From the repository root, with the virtual environment active:
 python -m uvicorn app.main:app --reload
 
 
-The API is available at `http://127.0.0.1:8000`. Interactive Swagger documentation is at [`/docs`](http://127.0.0.1:8000/docs).
+The frontend and API are available at `http://127.0.0.1:8000`. Interactive Swagger documentation is at [`/docs`](http://127.0.0.1:8000/docs).
 
 API endpoints:
 `GET /` and `GET /health/` -> Health checks

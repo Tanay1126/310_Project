@@ -1,19 +1,6 @@
-from app.repositories.restaurant_repository import (
-    read_categories,
-    read_items,
-    read_menus,
-    read_restaurants,
-    write_items,
-    write_restaurants,
-)
-from app.schemas import (
-    Menu,
-    MenuCategory,
-    MenuItem,
-    MenuItemCreate,
-    Restaurant,
-    RestaurantCreate,
-)
+from app.repositories.restaurant_repository import create_restaurant as save_restaurant
+from app.repositories.restaurant_repository import read_restaurants, read_menus, read_categories, read_items
+from app.schemas import Restaurant, RestaurantCreate, Menu, MenuCategory, MenuItem
 
 
 def list_restaurants(
@@ -63,27 +50,9 @@ def get_restaurant(restaurant_id: int) -> Restaurant | None:
     )
 
 
-def create_restaurant(payload: RestaurantCreate) -> Restaurant:
-    # Assign the next ID and retain the new restaurant.
-    records = read_restaurants()
-    restaurant = Restaurant(
-        id=max((record["id"] for record in records), default=0) + 1,
-        **payload.model_dump(),
-    )
-    records.append(restaurant.model_dump())
-    write_restaurants(records)
-    return restaurant
-
-
-def update_restaurant(restaurant_id: int, changes: dict[str, object]) -> Restaurant | None:
-    # Persist supplied fields for the matching restaurant.
-    records = read_restaurants()
-    for record in records:
-        if record["id"] == restaurant_id:
-            record.update(changes)
-            write_restaurants(records)
-            return Restaurant.model_validate(record)
-    return None
+def create_restaurant(restaurant: RestaurantCreate) -> Restaurant:
+    record = save_restaurant(restaurant.model_dump(exclude_none=True))
+    return Restaurant.model_validate(record)
 
 
 def get_menus(restaurant_id: int) -> list[Menu]:
