@@ -88,16 +88,16 @@ Identify anything that could prevent the team from achieving the sprint goal.
 For work to be considered **DONE**, the team agrees that it must satisfy the following:
 
 - [ ] Requirements/acceptance criteria are satisfied.
-- [ ] Business logic is implemented in the appropriate service layer.
+- [x] Business logic is implemented in the appropriate service layer.
 - [ ] Persistence is handled through the repository layer.
-- [ ] Appropriate unit tests are included.
-- [ ] Appropriate integration/API tests are included.
-- [ ] Tests pass.
-- [ ] Code has been reviewed by at least one teammate.
-- [ ] Review feedback has been addressed.
+- [x] Appropriate unit tests are included.
+- [x] Appropriate integration/API tests are included.
+- [x] Tests pass.
+- [x] Code has been reviewed by at least one teammate.
+- [x] Review feedback has been addressed.
 - [ ] Documentation has been updated where necessary.
-- [ ] The change is integrated into the team's working version.
-- [ ] No known critical defects remain.
+- [x] The change is integrated into the team's working version.
+- [x] No known critical defects remain.
 
 ---
 
@@ -107,10 +107,10 @@ Before ending the meeting, each team member should confirm their understanding o
 
 | Team Member | Initial Responsibilities | Confirmed |
 |---|---|---|
-|Flower Meadows | | ☐ |
-|Gabriel Dantes | | ☐ |
-|Tanay Desai | | ☐ |
-|Yug Gullapalli | | ☐ |
+|Flower Meadows |tests and end checks | x |
+|Gabriel Dantes |schemas and foundation | x |
+|Tanay Desai |front-end and initial checks | x |
+|Yug Gullapalli |documentation and overview | x |
 
 ---
 
