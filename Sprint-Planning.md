@@ -60,10 +60,10 @@ Break larger user stories into smaller tasks that can be implemented, reviewed, 
 Identify work that depends on another team member, subsystem, or component.
 
 | Dependency | Related User Stories | Who is Responsible? | Planned Resolution |
-|---|---|---|---|
-| | | | |
-| | | | |
-| | | | |
+|---------------------------|----------|------|-----|
+| As a visitor, See a List of Restaurants | Story A1 |Tanay| Adapting a front end component that shows the list of restaurants|
+|As a visitor, I want to view a restaurants detail and menu | Story A2 | Gabriel | Making schemas that display details for menu that customers can see  |
+|As a directory maintainer, I want to add a restaurant | Story B1 | | |
 
 ### Integration Plan
 
@@ -77,8 +77,7 @@ Identify anything that could prevent the team from achieving the sprint goal.
 
 | Risk / Blocker | Impact | Planned Action | Owner |
 |---|---|---|---|
-| | | | |
-| | | | |
+| Dependency Preloading issue|Sometimes Unit Tests used to struggle with dependencies | It's been solved with modifying some of the backend code and yml errors | Meadow
 | | | | |
 
 ---
