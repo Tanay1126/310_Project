@@ -32,10 +32,10 @@ Select the user stories that the team commits to working on during this sprint.
 
 | User Story | Description | Priority | Primary Owner | Dependencies |
 |---|---|------|-----------|---|
-| # |A1| High  | We want users to see the contents in a list  |  Tanay |
-| # |A2| Medium|We want users to see details  |  |   
-| # |A | High  |Browsing restaurants  | |
-| # |B | Medium|Add and update restaurant listing so that visitors can discover it | |
+| #1 |A1| High  | We want users to see the contents in a list  |  Tanay |
+| #2 |A2| Medium|We want users to see details  |  |   
+| #3 |A | High  |Browsing restaurants  | |
+| #4 |B | Medium|Add and update restaurant listing so that visitors can discover it | |
 
 > **Important:** Primary ownership means that the student is responsible for coordinating the work. It does not mean that the student works alone or that other team members cannot contribute.
 
@@ -47,11 +47,11 @@ Break larger user stories into smaller tasks that can be implemented, reviewed, 
 
 ### User Story #[NUMBER] — [TITLE]
 
-- [ ] Task
-- [ ] Task
-- [ ] Task
-- [ ] Tests
-- [ ] Documentation / API updates
+- [x] User Story #1 - Expand Schemas beyond just Restaurants
+- [x] User Story #1 - Update Routes/Services/Repositories to match
+- [x] User Story #1 - Update data to match
+- [x] User Story #1 - Create Front-End for viewing
+- [x] Documentation / API updates
 
 ---
 
@@ -86,15 +86,15 @@ Identify anything that could prevent the team from achieving the sprint goal.
 
 For work to be considered **DONE**, the team agrees that it must satisfy the following:
 
-- [ ] Requirements/acceptance criteria are satisfied.
+- [x] Requirements/acceptance criteria are satisfied.
 - [x] Business logic is implemented in the appropriate service layer.
-- [ ] Persistence is handled through the repository layer.
+- [x] Persistence is handled through the repository layer.
 - [x] Appropriate unit tests are included.
 - [x] Appropriate integration/API tests are included.
 - [x] Tests pass.
 - [x] Code has been reviewed by at least one teammate.
 - [x] Review feedback has been addressed.
-- [ ] Documentation has been updated where necessary.
+- [x] Documentation has been updated where necessary.
 - [x] The change is integrated into the team's working version.
 - [x] No known critical defects remain.
 
