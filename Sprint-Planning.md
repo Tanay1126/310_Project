@@ -31,11 +31,11 @@ The team will have the first milestone slice finished by the end. That more spec
 Select the user stories that the team commits to working on during this sprint.
 
 | User Story | Description | Priority | Primary Owner | Dependencies |
-|---|---|---|---|---|
-| # | | High / Medium / Low | | |
-| # | | High / Medium / Low | | |
-| # | | High / Medium / Low | | |
-| # | | High / Medium / Low | | |
+|---|---|------|-----------|---|
+| # |A1| High  | We want users to see the contents in a list  |  Tanay |
+| # |A2| Medium|We want users to see details  |  |   
+| # |A | High  |Browsing restaurants  | |
+| # |B | Medium|Add and update restaurant listing so that visitors can discover it | |
 
 > **Important:** Primary ownership means that the student is responsible for coordinating the work. It does not mean that the student works alone or that other team members cannot contribute.
 
