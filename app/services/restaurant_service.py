@@ -1,6 +1,7 @@
 from app.repositories.restaurant_repository import (
     create_item as save_item,
     create_restaurant as save_restaurant,
+    get_restaurant_by_id as read_restaurant_by_id,
     read_categories,
     read_items,
     read_menus,
@@ -62,10 +63,8 @@ def list_restaurants(
 
 def get_restaurant(restaurant_id: int) -> Restaurant | None:
     # Return None when the ID is unknown so the route responds 404.
-    return next(
-        (restaurant for restaurant in list_restaurants() if restaurant.id == restaurant_id),
-        None,
-    )
+    record = read_restaurant_by_id(restaurant_id)
+    return Restaurant.model_validate(record) if record is not None else None
 
 
 def create_restaurant(restaurant: RestaurantCreate) -> Restaurant:
@@ -122,6 +121,19 @@ def get_menu_items(restaurant_id: int, menu_id: int | None = None) -> list[MenuI
         MenuItem.model_validate(item)
         for item in read_items()
         if item["category_id"] in category_ids
+    ]
+
+
+def get_menu_items_for_menu(
+    restaurant_id: int, menu_id: int
+) -> list[MenuItem] | None:
+    menu = get_menu(restaurant_id, menu_id)
+    if menu is None:
+        return None
+    return [
+        item
+        for category in menu.categories or []
+        for item in category.items or []
     ]
 
 

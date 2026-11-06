@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from app import repositories
 from app.main import app
+from app.repositories.restaurant_repository import get_restaurant_by_id
 
 client = TestClient(app)
 
@@ -36,6 +37,20 @@ def test_restaurant_search_and_filters(isolated_data: tuple[Path, bytes]) -> Non
     assert [restaurant["id"] for restaurant in response.json()] == [1, 2]
 
 
+def test_repository_get_restaurant_by_id(tmp_path: Path) -> None:
+    restaurant_path = tmp_path / "restaurants.json"
+    restaurant_path.write_text(
+        '[{"id": 1, "name": "First"}, {"id": 2, "name": "Second"}]',
+        encoding="utf-8",
+    )
+
+    assert get_restaurant_by_id(2, data_file=restaurant_path) == {
+        "id": 2,
+        "name": "Second",
+    }
+    assert get_restaurant_by_id(3, data_file=restaurant_path) is None
+
+
 def test_read_menu_and_its_items(isolated_data: tuple[Path, bytes]) -> None:
     response = client.get("/restaurants/1/menus/11")
     assert response.status_code == 200
@@ -44,6 +59,22 @@ def test_read_menu_and_its_items(isolated_data: tuple[Path, bytes]) -> None:
     response = client.get("/restaurants/1/menus/11/items")
     assert response.status_code == 200
     assert [item["id"] for item in response.json()] == [1111]
+
+
+def test_read_menu_items_distinguishes_empty_and_missing_menu(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    item_path = tmp_path / "items.json"
+    item_path.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(repositories.restaurant_repository, "item_file", item_path)
+
+    response = client.get("/restaurants/1/menus/11/items")
+    assert response.status_code == 200
+    assert response.json() == []
+
+    response = client.get("/restaurants/1/menus/999/items")
+    assert response.status_code == 404
 
 
 def test_create_and_update_restaurant(

@@ -25,6 +25,19 @@ def read_restaurants(data_file: Path | None = None) -> list[dict[str, Any]]:
     return _read_records(data_file if data_file is not None else restaurant_file)
 
 
+def get_restaurant_by_id(
+    restaurant_id: int, data_file: Path | None = None
+) -> dict[str, Any] | None:
+    return next(
+        (
+            record
+            for record in read_restaurants(data_file)
+            if record["id"] == restaurant_id
+        ),
+        None,
+    )
+
+
 def create_restaurant(
     record: dict[str, Any], data_file: Path | None = None
 ) -> dict[str, Any]:

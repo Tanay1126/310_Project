@@ -15,6 +15,7 @@ from app.services.restaurant_service import (
     get_menu,
     get_menu_item,
     get_menu_items,
+    get_menu_items_for_menu,
     get_menus,
     get_restaurant,
     list_restaurants,
@@ -26,11 +27,6 @@ router = APIRouter(prefix="/restaurants", tags=["restaurants"])
 
 
 # Customer endpoints for restaurant and menu lookups, plus restaurant creation.
-@router.get("/health", response_model=dict)
-def check_health():
-    return {"status": "healthy"}
-
-
 @router.get("/", response_model=list[Restaurant])
 def read_restaurants(
     q: str | None = None,
@@ -83,9 +79,10 @@ def read_menu(restaurant_id: int, menu_id: int) -> Menu:
 
 @router.get("/{restaurant_id}/menus/{menu_id}/items", response_model=list[MenuItem])
 def read_menu_items(restaurant_id: int, menu_id: int) -> list[MenuItem]:
-    if get_menu(restaurant_id, menu_id) is None:
+    items = get_menu_items_for_menu(restaurant_id, menu_id)
+    if items is None:
         raise HTTPException(status_code=404, detail="Menu not found")
-    return get_menu_items(restaurant_id, menu_id)
+    return items
 
 
 @router.get("/{restaurant_id}/menu-items", response_model=list[MenuItem])
