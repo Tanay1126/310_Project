@@ -48,6 +48,8 @@ class MenuItemCreate(BaseModel):
     price: float = Field(ge=0)
     description: str | None = None
     ingredients: list[str] | None = None
+    available: bool = True
+    active: bool = True
 
 
 class MenuItemUpdate(BaseModel):
@@ -56,12 +58,14 @@ class MenuItemUpdate(BaseModel):
     price: float | None = Field(default=None, ge=0)
     description: str | None = None
     ingredients: list[str] | None = None
+    available: bool | None = None
+    active: bool | None = None
 
-    @field_validator("category_id", "name", "price")
+    @field_validator("category_id", "name", "price", "available", "active")
     @classmethod
     def required_fields_must_not_be_null(
-        cls, value: int | str | float | None
-    ) -> int | str | float | None:
+        cls, value: int | str | float | bool | None
+    ) -> int | str | float | bool | None:
         if value is None:
             raise ValueError("This field must not be null")
         return value
@@ -74,6 +78,8 @@ class MenuItem(BaseModel):
     price: float
     description: str | None = None
     ingredients: list[str] | None = None
+    available: bool = True
+    active: bool = True
 
 class MenuCategory(BaseModel):
     menu_id: int
@@ -87,5 +93,120 @@ class Menu(BaseModel):
     id: int
     name: str
     categories: list[MenuCategory] | None = None
+
+
+class CustomerCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    email: str = Field(min_length=3, max_length=254)
+    password: str = Field(min_length=8, max_length=128)
+    delivery_address: str = Field(min_length=1, max_length=500)
+
+    @field_validator("name", "email", "delivery_address")
+    @classmethod
+    def strip_required_text(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("This field must not be blank")
+        return normalized
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        email = value.casefold()
+        if email.count("@") != 1 or "." not in email.rsplit("@", maxsplit=1)[-1]:
+            raise ValueError("A valid email address is required")
+        return email
+
+
+class CustomerLogin(BaseModel):
+    email: str
+    password: str
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        email = value.strip().casefold()
+        if email.count("@") != 1 or "." not in email.rsplit("@", maxsplit=1)[-1]:
+            raise ValueError("A valid email address is required")
+        return email
+
+
+class CustomerUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    email: str | None = Field(default=None, min_length=3, max_length=254)
+    delivery_address: str | None = Field(default=None, min_length=1, max_length=500)
+
+    @field_validator("name", "email", "delivery_address")
+    @classmethod
+    def validate_optional_text(cls, value: str | None) -> str | None:
+        if value is None:
+            raise ValueError("This field must not be null")
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("This field must not be blank")
+        return normalized
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        email = value.casefold()
+        if email.count("@") != 1 or "." not in email.rsplit("@", maxsplit=1)[-1]:
+            raise ValueError("A valid email address is required")
+        return email
+
+
+class Customer(BaseModel):
+    id: int
+    name: str
+    email: str
+    delivery_address: str
+    role: str = "customer"
+    active: bool = True
+
+
+class AuthToken(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    customer: Customer
+
+
+class CartItemRequest(BaseModel):
+    item_id: int = Field(gt=0)
+    quantity: int = Field(ge=1, le=99)
+
+
+class CartItemUpdate(BaseModel):
+    quantity: int = Field(ge=1, le=99)
+
+
+class CartLine(BaseModel):
+    item_id: int
+    name: str
+    unit_price: float
+    quantity: int
+    line_total: float
+
+
+class Cart(BaseModel):
+    id: int
+    customer_id: int
+    restaurant_id: int | None = None
+    items: list[CartLine]
+    subtotal: float
+    total: float
+
+
+class Order(BaseModel):
+    id: int
+    customer_id: int
+    restaurant_id: int
+    customer_name: str
+    delivery_address: str
+    items: list[CartLine]
+    subtotal: float
+    total: float
+    status: str = "placed"
 
 
