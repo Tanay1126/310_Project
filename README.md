@@ -50,10 +50,19 @@ API endpoints:
 `GET /restaurants/{restaurant_id}/menu-items/{item_id}` -> Get one menu item
 `POST /restaurants/{restaurant_id}/menu-items` -> Add a menu item (provide its `category_id`)
 `PUT/PATCH /restaurants/{restaurant_id}/menu-items/{item_id}` -> Update menu item information
+`POST /customers/` -> Register a customer account
+`POST /customers/login` -> Sign in and receive a bearer token
+`GET/PATCH/DELETE /customers/me` -> Read, update, or deactivate the authenticated customer
+`GET/DELETE /customers/me/cart` -> Retrieve or clear the authenticated customer's active cart
+`POST /customers/me/cart/items` -> Add an available menu item to the cart
+`PATCH/DELETE /customers/me/cart/items/{item_id}` -> Change quantity or remove a cart item
+`POST /customers/me/checkout` -> Revalidate and persist the cart as an order
+`GET /customers/me/orders` and `GET /customers/me/orders/{order_id}` -> Retrieve owned orders
 
 Representative data:
 Restaurant records are stored in [`data/restaurants.json`](data/restaurants.json). Each record has an ID, name, cuisine, description, and rating.
 Restaurant and menu-item create/update operations are persisted to the corresponding JSON files in `data/`.
+Customer accounts, active carts, and order snapshots are stored in `data/customers.json`, `data/carts.json`, and `data/orders.json`. Customer workflow endpoints other than registration and sign-in require `Authorization: Bearer <access_token>`. Passwords are stored as salted PBKDF2 hashes; bearer tokens expire after 12 hours and are invalidated when the application restarts.
 
 Tests:
 From the repository root, the command to run tests is:

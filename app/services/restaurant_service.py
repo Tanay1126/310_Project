@@ -132,6 +132,29 @@ def get_menu_item(restaurant_id: int, item_id: int) -> MenuItem | None:
     )
 
 
+def get_menu_item_context(item_id: int) -> tuple[MenuItem, int] | None:
+    record = next((item for item in read_items() if item["id"] == item_id), None)
+    if record is None:
+        return None
+    category = next(
+        (
+            category
+            for category in read_categories()
+            if category["id"] == record["category_id"]
+        ),
+        None,
+    )
+    if category is None:
+        return None
+    menu = next(
+        (menu for menu in read_menus() if menu["id"] == category["menu_id"]),
+        None,
+    )
+    if menu is None or get_restaurant(menu["restaurant_id"]) is None:
+        return None
+    return MenuItem.model_validate(record), menu["restaurant_id"]
+
+
 def create_menu_item(restaurant_id: int, item: MenuItemCreate) -> MenuItem | None:
     category = next(
         (category for category in read_categories() if category["id"] == item.category_id),

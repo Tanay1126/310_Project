@@ -94,10 +94,28 @@
     }
     textarea { min-height: 90px; resize: vertical; }
     .hint { margin: -.3rem 0 0; color: #526671; font-size: .82rem; }
+    .search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 1rem; }
+    .search-form button { align-self: end; }
+    .cart-line, .order-card {
+      display: flex;
+      justify-content: space-between;
+      gap: .75rem;
+      align-items: center;
+      padding: .75rem 0;
+      border-bottom: 1px solid #e0e8eb;
+    }
+    .cart-line label { min-width: 90px; }
+    .cart-line input { min-width: 70px; }
+    .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .workflow-actions { display: flex; justify-content: space-between; gap: .75rem; align-items: center; }
+    .menu-item { display: flex; justify-content: space-between; gap: .75rem; align-items: center; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
 
     @media (max-width: 700px) {
       main { grid-template-columns: 1fr; margin-top: 1rem; }
       .restaurant-card { align-items: flex-start; }
+      .search-form { grid-template-columns: 1fr; }
+      .cart-line { align-items: flex-start; flex-direction: column; }
     }
   </style>
 </head>
@@ -110,6 +128,25 @@
   <main>
     <section aria-labelledby="restaurants-heading">
       <h2 id="restaurants-heading">Restaurants</h2>
+      <form id="search-form" class="search-form" role="search">
+        <label>
+          Search
+          <input name="q" placeholder="Name, cuisine, or description">
+        </label>
+        <label>
+          Cuisine
+          <input name="cuisine" placeholder="Any cuisine">
+        </label>
+        <label>
+          Minimum rating
+          <input name="min_rating" type="number" min="0" max="5" step="0.1">
+        </label>
+        <label>
+          Maximum rating
+          <input name="max_rating" type="number" min="0" max="5" step="0.1">
+        </label>
+        <button type="submit">Search restaurants</button>
+      </form>
       <div id="restaurant-list" class="restaurant-list" aria-live="polite">
         <p class="muted">Loading restaurants…</p>
       </div>
@@ -141,6 +178,45 @@
       </form>
       <p id="form-message" class="message" role="status"></p>
     </section>
+
+    <section aria-labelledby="account-heading">
+      <div class="workflow-actions">
+        <h2 id="account-heading">Customer account</h2>
+        <button id="sign-out" class="secondary" type="button" hidden>Sign out</button>
+      </div>
+      <form id="login-form">
+        <h3>Sign in</h3>
+        <label>Email <input name="email" type="email" autocomplete="email" required></label>
+        <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit">Sign in</button>
+      </form>
+      <p class="hint">New here? Register below to start an order.</p>
+      <form id="register-form">
+        <h3>Create an account</h3>
+        <label>Name <input name="name" maxlength="100" autocomplete="name" required></label>
+        <label>Email <input name="email" type="email" maxlength="254" autocomplete="email" required></label>
+        <label>Password <input name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+        <label>Delivery address <textarea name="delivery_address" maxlength="500" autocomplete="street-address" required></textarea></label>
+        <button type="submit">Register</button>
+      </form>
+      <p id="account-message" class="message" role="status"></p>
+      <p id="signed-in-message" class="muted" hidden></p>
+    </section>
+
+    <section id="customer-workflow" aria-labelledby="cart-heading" hidden>
+      <h2 id="cart-heading">Your cart</h2>
+      <div id="cart-content" aria-live="polite"></div>
+      <div class="workflow-actions">
+        <p id="cart-total"><strong>Total: $0.00</strong></p>
+        <div class="actions">
+          <button id="clear-cart" class="secondary" type="button">Clear cart</button>
+          <button id="checkout" type="button">Checkout</button>
+        </div>
+      </div>
+      <p id="cart-message" class="message" role="status"></p>
+      <h2>Order history</h2>
+      <div id="order-list" aria-live="polite"></div>
+    </section>
   </main>
 
   <script>
@@ -149,6 +225,19 @@
     const detailsElement = document.querySelector("#restaurant-details");
     const form = document.querySelector("#create-form");
     const formMessage = document.querySelector("#form-message");
+    const searchForm = document.querySelector("#search-form");
+    const loginForm = document.querySelector("#login-form");
+    const registerForm = document.querySelector("#register-form");
+    const accountMessage = document.querySelector("#account-message");
+    const signedInMessage = document.querySelector("#signed-in-message");
+    const signOutButton = document.querySelector("#sign-out");
+    const workflowElement = document.querySelector("#customer-workflow");
+    const cartContent = document.querySelector("#cart-content");
+    const cartTotal = document.querySelector("#cart-total");
+    const cartMessage = document.querySelector("#cart-message");
+    const orderList = document.querySelector("#order-list");
+    let signedInCustomer = null;
+    let currentFilters = {};
 
     function addText(parent, tagName, text, className) {
       const element = document.createElement(tagName);
@@ -158,8 +247,11 @@
       return element;
     }
 
-    async function requestJson(url, options) {
-      const response = await fetch(url, options);
+    async function requestJson(url, options = {}) {
+      const headers = new Headers(options.headers || {});
+      const token = sessionStorage.getItem("access_token");
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      const response = await fetch(url, { ...options, headers });
       if (!response.ok) {
         let message = `Request failed (${response.status})`;
         try {
@@ -171,6 +263,131 @@
         throw new Error(message);
       }
       return response.json();
+    }
+
+    function setSignedIn(customer) {
+      signedInCustomer = customer;
+      const authenticated = Boolean(customer);
+      loginForm.hidden = authenticated;
+      registerForm.hidden = authenticated;
+      signOutButton.hidden = !authenticated;
+      workflowElement.hidden = !authenticated;
+      signedInMessage.hidden = !authenticated;
+      signedInMessage.textContent = authenticated
+        ? `Signed in as ${customer.name} (${customer.email}).`
+        : "";
+      if (authenticated) {
+        loadCart();
+        loadOrders();
+      } else {
+        cartContent.replaceChildren();
+        orderList.replaceChildren();
+      }
+    }
+
+    async function loadCart() {
+      try {
+        const cart = await requestJson("/customers/me/cart");
+        cartContent.replaceChildren();
+        if (!cart.items.length) {
+          addText(cartContent, "p", "Your cart is empty.", "muted");
+        }
+        for (const item of cart.items) {
+          const row = document.createElement("div");
+          row.className = "cart-line";
+          addText(
+            row,
+            "span",
+            `${item.name} — $${item.unit_price.toFixed(2)} each, $${item.line_total.toFixed(2)} total`
+          );
+          const quantityForm = document.createElement("form");
+          quantityForm.className = "actions";
+          const quantityLabel = document.createElement("label");
+          quantityLabel.textContent = "Quantity";
+          const quantity = document.createElement("input");
+          quantity.type = "number";
+          quantity.min = "1";
+          quantity.max = "99";
+          quantity.value = item.quantity;
+          quantityLabel.append(quantity);
+          quantityForm.append(quantityLabel);
+          const updateButton = document.createElement("button");
+          updateButton.type = "submit";
+          updateButton.textContent = "Update";
+          quantityForm.append(updateButton);
+          quantityForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            await updateCartItem(item.item_id, Number(quantity.value));
+          });
+          const removeButton = document.createElement("button");
+          removeButton.type = "button";
+          removeButton.className = "secondary";
+          removeButton.textContent = "Remove";
+          removeButton.addEventListener("click", () => removeCartItem(item.item_id));
+          row.append(quantityForm, removeButton);
+          cartContent.append(row);
+        }
+        cartTotal.textContent = `Subtotal / total: $${cart.total.toFixed(2)}`;
+        cartMessage.textContent = "";
+      } catch (error) {
+        cartMessage.textContent = `Could not load cart: ${error.message}`;
+      }
+    }
+
+    async function updateCartItem(itemId, quantity) {
+      try {
+        await requestJson(`/customers/me/cart/items/${itemId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quantity })
+        });
+        await loadCart();
+      } catch (error) {
+        cartMessage.textContent = `Could not update cart: ${error.message}`;
+      }
+    }
+
+    async function removeCartItem(itemId) {
+      try {
+        await requestJson(`/customers/me/cart/items/${itemId}`, { method: "DELETE" });
+        await loadCart();
+      } catch (error) {
+        cartMessage.textContent = `Could not remove item: ${error.message}`;
+      }
+    }
+
+    async function loadOrders() {
+      try {
+        const orders = await requestJson("/customers/me/orders");
+        orderList.replaceChildren();
+        if (!orders.length) {
+          addText(orderList, "p", "No orders yet.", "muted");
+          return;
+        }
+        for (const order of orders) {
+          const row = document.createElement("article");
+          row.className = "order-card";
+          const names = order.items.map(item => `${item.quantity} × ${item.name}`).join(", ");
+          addText(row, "p", `Order #${order.id}: ${names} — $${order.total.toFixed(2)}`);
+          orderList.append(row);
+        }
+      } catch (error) {
+        addText(orderList, "p", `Could not load orders: ${error.message}`, "muted");
+      }
+    }
+
+    async function addItemToCart(itemId) {
+      try {
+        await requestJson("/customers/me/cart/items", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ item_id: itemId, quantity: 1 })
+        });
+        await loadCart();
+        cartMessage.textContent = "Item added to your cart.";
+      } catch (error) {
+        cartMessage.textContent = `Could not add item: ${error.message}`;
+      }
     }
 
     async function showDetails(id) {
@@ -200,7 +417,20 @@
                 const categoryItem = document.createElement("li");
                 categoryItem.textContent = category.name;
                 if (category.items?.length) {
-                  categoryItem.textContent += `: ${category.items.map(item => item.name).join(", ")}`;
+                  const itemList = document.createElement("ul");
+                  for (const item of category.items) {
+                    const itemRow = document.createElement("li");
+                    itemRow.className = "menu-item";
+                    addText(itemRow, "span", `${item.name} — $${item.price.toFixed(2)}`);
+                    const addButton = document.createElement("button");
+                    addButton.type = "button";
+                    addButton.textContent = signedInCustomer ? "Add to cart" : "Sign in to order";
+                    addButton.disabled = !signedInCustomer || !item.available || !item.active;
+                    addButton.addEventListener("click", () => addItemToCart(item.id));
+                    itemRow.append(addButton);
+                    itemList.append(itemRow);
+                  }
+                  categoryItem.append(itemList);
                 }
                 categoryList.append(categoryItem);
               }
@@ -222,7 +452,12 @@
       listMessage.textContent = "";
       listElement.replaceChildren();
       try {
-        const restaurants = await requestJson("/restaurants/");
+        const query = new URLSearchParams(
+          Object.entries(currentFilters).filter(([, value]) => value !== "")
+        );
+        const encodedQuery = query.toString();
+        const suffix = encodedQuery ? `?${encodedQuery}` : "";
+        const restaurants = await requestJson(`/restaurants/${suffix}`);
         if (!restaurants.length) {
           addText(listElement, "p", "No restaurants yet. Add one using the form.", "muted");
           return;
@@ -250,6 +485,95 @@
       }
     }
 
+    searchForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const values = new FormData(searchForm);
+      currentFilters = Object.fromEntries(
+        ["q", "cuisine", "min_rating", "max_rating"].map(name => [
+          name,
+          String(values.get(name) || "").trim()
+        ])
+      );
+      await loadRestaurants();
+    });
+
+    loginForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      accountMessage.textContent = "Signing in…";
+      const values = new FormData(loginForm);
+      try {
+        const result = await requestJson("/customers/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: values.get("email"),
+            password: values.get("password")
+          })
+        });
+        sessionStorage.setItem("access_token", result.access_token);
+        setSignedIn(result.customer);
+        accountMessage.textContent = "";
+      } catch (error) {
+        accountMessage.textContent = `Could not sign in: ${error.message}`;
+      }
+    });
+
+    registerForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      accountMessage.textContent = "Creating account…";
+      const values = new FormData(registerForm);
+      const credentials = {
+        name: values.get("name").trim(),
+        email: values.get("email").trim(),
+        password: values.get("password"),
+        delivery_address: values.get("delivery_address").trim()
+      };
+      try {
+        await requestJson("/customers/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials)
+        });
+        const result = await requestJson("/customers/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: credentials.email, password: credentials.password })
+        });
+        sessionStorage.setItem("access_token", result.access_token);
+        setSignedIn(result.customer);
+        accountMessage.textContent = "Account created and signed in.";
+      } catch (error) {
+        accountMessage.textContent = `Could not register: ${error.message}`;
+      }
+    });
+
+    signOutButton.addEventListener("click", () => {
+      sessionStorage.removeItem("access_token");
+      setSignedIn(null);
+      accountMessage.textContent = "You have signed out.";
+    });
+
+    document.querySelector("#clear-cart").addEventListener("click", async () => {
+      try {
+        await requestJson("/customers/me/cart", { method: "DELETE" });
+        await loadCart();
+        cartMessage.textContent = "Cart cleared.";
+      } catch (error) {
+        cartMessage.textContent = `Could not clear cart: ${error.message}`;
+      }
+    });
+
+    document.querySelector("#checkout").addEventListener("click", async () => {
+      try {
+        const order = await requestJson("/customers/me/checkout", { method: "POST" });
+        await loadCart();
+        await loadOrders();
+        cartMessage.textContent = `Order #${order.id} placed for $${order.total.toFixed(2)}.`;
+      } catch (error) {
+        cartMessage.textContent = `Checkout failed: ${error.message}`;
+      }
+    });
+
     form.addEventListener("submit", async event => {
       event.preventDefault();
       formMessage.textContent = "Creating restaurant…";
@@ -275,6 +599,15 @@
       }
     });
 
+    const savedToken = sessionStorage.getItem("access_token");
+    if (savedToken) {
+      requestJson("/customers/me")
+        .then(setSignedIn)
+        .catch(() => {
+          sessionStorage.removeItem("access_token");
+          setSignedIn(null);
+        });
+    }
     loadRestaurants();
   </script>
 </body>
