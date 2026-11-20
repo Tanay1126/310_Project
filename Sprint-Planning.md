@@ -115,4 +115,102 @@ Before ending the meeting, each team member should confirm their understanding o
 
 ## Meeting Notes
 
+---
+
+## Sprint Information
+
+- **Sprint / Milestone:** Milestone 2
+- **Sprint dates:** 2026-10-19 to 2026-11-20
+- **Planning meeting date:** 2026-10-19
+- **Facilitator:** Flower Meadows
+
+### Team Members
+
+- [ ] Flower Meadows
+- [ ] Gabriel Dantes
+- [ ] Tanay Desai
+- [ ] Yug Gullapalli
+
+---
+
+## 1. Sprint Goal
+
+> What should the team have working by the end of this sprint?
+
+**Sprint Goal:**
+
+The team will have the second milestone slice finished by the end. That more specifically being the aspect of managing customer, cart, and order information, and allowing a customer to fully submit an order.
+
+---
+
+## 2. Sprint Backlog
+
+Select the user stories that the team commits to working on during this sprint.
+
+| User Story | Story Number | Priority | Description | Dependencies |
+|---|---|------|-----------|---|
+| #2 |C | High  | Customer accounts  | C1, C2, C3 |   
+| #1 |C1| High  | Customer account registration  |  |
+| #2 |C2| Medium| Customer account passwords  |  |   
+| #2 |C3| Medium| Customer account email update  |  |   
+| #3 |D | High  | Customer carts | D1, D2, D3, D4 |
+| #4 |D1| Medium| Customer cart contents displayed | |
+| #4 |D2| Medium| Customer cart add items | |
+| #4 |D3| Medium| Customer cart remove item | |
+| #4 |D4| Medium| Customer cart view subtotal | |
+
+> **Important:** Primary ownership means that the student is responsible for coordinating the work. It does not mean that the student works alone or that other team members cannot contribute.
+
+---
+
+### Integration Plan
+
+<!-- Describe how the team will integrate the work during the sprint. -->
+
+---
+
+## 5. Risks and Potential Blockers
+
+Identify anything that could prevent the team from achieving the sprint goal.
+
+| Risk / Blocker | Impact | Planned Action | Owner |
+|---|---|---|---|
+| Code Readability | Code can be hard to read/understand, making using endpoints difficult | refactoring code, specifically lots of duplicate and dead code | Tanay
+| | | | |
+
+---
+
+## 6. Definition of Done
+
+For work to be considered **DONE**, the team agrees that it must satisfy the following:
+
+- [x] Requirements/acceptance criteria are satisfied.
+- [x] Business logic is implemented in the appropriate service layer.
+- [x] Persistence is handled through the repository layer.
+- [x] Appropriate unit tests are included.
+- [x] Appropriate integration/API tests are included.
+- [x] Tests pass.
+- [x] Code has been reviewed by at least one teammate.
+- [x] Review feedback has been addressed.
+- [x] Documentation has been updated where necessary.
+- [x] The change is integrated into the team's working version.
+- [x] No known critical defects remain.
+
+---
+
+## 7. Sprint Commitment
+
+Before ending the meeting, each team member should confirm their understanding of the sprint plan.
+
+| Team Member | Initial Responsibilities | Confirmed |
+|---|---|---|
+|Flower Meadows |Documentation, Coordination, updating Github | x |
+|Gabriel Dantes | | x |
+|Tanay Desai | | x |
+|Yug Gullapalli | | x |
+
+---
+
+## Meeting Notes
+
 <!-- Add any additional notes, decisions, or questions from the planning meeting. -->
