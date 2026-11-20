@@ -175,8 +175,8 @@ Identify anything that could prevent the team from achieving the sprint goal.
 
 | Risk / Blocker | Impact | Planned Action | Owner |
 |---|---|---|---|
-| Code Readability | Code can be hard to read/understand, making using endpoints difficult | refactoring code, specifically lots of duplicate and dead code | Tanay
-| | | | |
+| Code Readability | Code can be hard to read/understand, making using endpoints difficult | refactoring code, specifically lots of duplicate and dead code | Tanay |
+|Endpoint Testing  | Certain endpoints werent functioning and eliminated service logic | Improved logic and added more methods post refactoring, Resolved endpoint quality |Tanay |
 
 ---
 
@@ -206,7 +206,7 @@ Before ending the meeting, each team member should confirm their understanding o
 |---|---|---|
 |Flower Meadows |Documentation, Coordination, updating Github | x |
 |Gabriel Dantes | | x |
-|Tanay Desai | | x |
+|Tanay Desai |Backend authentication, Rehearsing Endpoints, Establishing logic for carts and customers | x  |
 |Yug Gullapalli | | x |
 
 ---
