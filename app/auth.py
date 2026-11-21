@@ -16,7 +16,11 @@ from app.schemas import Customer
 _TOKEN_SECRET = secrets.token_bytes(32)
 _TOKEN_TTL_SECONDS = 12 * 60 * 60
 _PASSWORD_ITERATIONS = 310_000
-_bearer_scheme = HTTPBearer(auto_error=False)
+_bearer_scheme = HTTPBearer(
+    scheme_name="BearerAuth",
+    bearerFormat="Opaque",
+    auto_error=False,
+)
 
 
 def hash_password(password: str) -> dict[str, str | int]:

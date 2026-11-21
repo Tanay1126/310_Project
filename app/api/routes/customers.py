@@ -29,8 +29,11 @@ def _handle_workflow_error(error: WorkflowError) -> HTTPException:
     response_model=Customer,
     status_code=status.HTTP_201_CREATED,
     summary="Register a customer account",
-    description="Creates an active customer account. Passwords are stored as salted hashes.",
-    responses={409: {"description": "Email address is already registered"}},
+    description="Creates an active customer account. Passwords are stored as salted PBKDF2 hashes.",
+    responses={
+        422: {"description": "Input validation failed"},
+        409: {"description": "Email address is already registered"},
+    },
 )
 def register_customer(customer: CustomerCreate) -> Customer:
     # Delegate account creation and return a public customer representation.
@@ -45,7 +48,10 @@ def register_customer(customer: CustomerCreate) -> Customer:
     response_model=AuthToken,
     summary="Sign in a customer",
     description="Returns a short-lived bearer token for protected customer operations.",
-    responses={401: {"description": "Invalid email or password"}},
+    responses={
+        422: {"description": "Input validation failed"},
+        401: {"description": "Invalid email or password"},
+    },
 )
 def login_customer(credentials: CustomerLogin) -> AuthToken:
     # A successful sign-in returns both the bearer token and customer identity.
@@ -72,7 +78,11 @@ def read_customer(customer: Customer = Depends(get_current_customer)) -> Custome
     "/me",
     response_model=Customer,
     summary="Update customer information",
-    responses={401: {"description": "Authentication required"}},
+    responses={
+        401: {"description": "Authentication required"},
+        422: {"description": "Input validation failed"},
+        409: {"description": "Email address is already registered"},
+    },
 )
 def edit_customer(
     changes: CustomerUpdate,
@@ -113,6 +123,7 @@ def read_cart(customer: Customer = Depends(get_current_customer)) -> Cart:
     responses={
         401: {"description": "Authentication required"},
         404: {"description": "Menu item not found"},
+        422: {"description": "Input validation failed"},
         409: {"description": "Item unavailable or cart belongs to another restaurant"},
     },
 )
@@ -132,7 +143,11 @@ def add_cart_item(
     "/me/cart/items/{item_id}",
     response_model=Cart,
     summary="Change a cart item quantity",
-    responses={401: {"description": "Authentication required"}, 404: {"description": "Cart item not found"}},
+    responses={
+        401: {"description": "Authentication required"},
+        404: {"description": "Cart item not found"},
+        422: {"description": "Input validation failed"},
+    },
 )
 def edit_cart_item(
     item_id: int,

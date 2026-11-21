@@ -43,3 +43,9 @@ AI GENERATED
 
 Asked for ideas on relevant user stories & refined pre-existing one for customers
 AI ASSISTED 
+
+Improved authentication & OpenAPI contract details
+AI GENERATED
+
+Asked CoPilot to add any details in README that arent stated 
+AI GENERATED
