@@ -40,3 +40,6 @@ AI GENERATED
 
 Added a test for cart preservation and checkout configuration.
 AI GENERATED 
+
+Asked for ideas on relevant user stories & refined pre-existing one for customers
+AI ASSISTED 
