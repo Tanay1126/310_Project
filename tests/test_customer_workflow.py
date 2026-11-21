@@ -104,7 +104,40 @@ def test_registration_authentication_and_customer_ownership(
     assert client.get("/customers/me/cart", headers=headers).status_code == 401
 
 
-def test_cart_checkout_recalculates_prices_and_preserves_order_snapshot(
+def test_authentication_and_cart_client_errors_are_documented_by_status(
+    isolated_workflow_data: None,
+) -> None:
+    register_customer()
+
+    wrong_password = client.post(
+        "/customers/login",
+        json={"email": "customer@example.com", "password": "WrongPassword123"},
+    )
+    assert wrong_password.status_code == 401
+
+    invalid_token = client.get(
+        "/customers/me/cart",
+        headers={"Authorization": "Bearer invalid.token"},
+    )
+    assert invalid_token.status_code == 401
+
+    headers = {"Authorization": f"Bearer {sign_in()}"}
+    missing_item = client.post(
+        "/customers/me/cart/items",
+        headers=headers,
+        json={"item_id": 999999, "quantity": 1},
+    )
+    assert missing_item.status_code == 404
+
+    invalid_quantity = client.post(
+        "/customers/me/cart/items",
+        headers=headers,
+        json={"item_id": 1111, "quantity": 100},
+    )
+    assert invalid_quantity.status_code == 422
+
+
+def test_integration_customer_menu_cart_checkout_preserves_order_snapshot(
     isolated_workflow_data: None,
 ) -> None:
     # Confirm checkout uses current prices and stores customer and order details.
@@ -148,7 +181,7 @@ def test_cart_checkout_recalculates_prices_and_preserves_order_snapshot(
     assert json.loads(repositories.workflow_repository.order_file.read_text())[0]["id"] == order["id"]
 
 
-def test_unavailable_menu_item_prevents_checkout_and_keeps_cart(
+def test_regression_unavailable_menu_item_prevents_checkout_and_keeps_cart(
     isolated_workflow_data: None,
 ) -> None:
     # An unavailable item should block checkout without clearing the cart.
