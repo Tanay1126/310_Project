@@ -64,6 +64,7 @@ def test_registration_authentication_and_customer_ownership(
     assert response.status_code == 401
 
     customer = register_customer()
+    # Password data must be stored securely and excluded from the response.
     assert customer["role"] == "customer"
     assert "password_hash" not in customer
     persisted_customer = repositories.workflow_repository.get_customer(customer["id"])
@@ -71,6 +72,7 @@ def test_registration_authentication_and_customer_ownership(
     assert persisted_customer["password_hash"] != "CorrectHorse123"
     assert "password" not in persisted_customer
     token = sign_in("CUSTOMER@example.com")
+    # Email matching should be case-insensitive and produce an authenticated cart.
     headers = {"Authorization": f"Bearer {token}"}
 
     cart = client.get("/customers/me/cart", headers=headers)
@@ -86,6 +88,7 @@ def test_registration_authentication_and_customer_ownership(
             "delivery_address": "Another address",
         },
     )
+    # Duplicate normalized emails should be rejected.
     assert duplicate.status_code == 409
 
     updated = client.patch(
@@ -95,6 +98,7 @@ def test_registration_authentication_and_customer_ownership(
     )
     assert updated.status_code == 200
     assert updated.json()["delivery_address"] == "20 Main Street"
+    # Deactivation should immediately invalidate existing bearer access.
     deactivated = client.delete("/customers/me", headers=headers)
     assert deactivated.status_code == 204
     assert client.get("/customers/me/cart", headers=headers).status_code == 401
@@ -122,11 +126,13 @@ def test_cart_checkout_recalculates_prices_and_preserves_order_snapshot(
     )
     assert second_restaurant_item.status_code == 409
 
+    # Simulate a menu price change after the customer adds the item.
     items = json.loads(repositories.restaurant_repository.item_file.read_text())
     items[0]["price"] = 6.25
     repositories.restaurant_repository.item_file.write_text(json.dumps(items))
 
     order_response = client.post("/customers/me/checkout", headers=headers)
+    # Checkout should use the new price and preserve it in the order.
     assert order_response.status_code == 201
     order = order_response.json()
     assert order["total"] == 12.5
@@ -135,6 +141,7 @@ def test_cart_checkout_recalculates_prices_and_preserves_order_snapshot(
     assert order["delivery_address"] == "10 Main Street"
 
     cart = client.get("/customers/me/cart", headers=headers).json()
+    # Successful checkout should clear the cart and persist one order.
     assert cart["items"] == []
     assert cart["total"] == 0
     assert client.get(f"/customers/me/orders/{order['id']}", headers=headers).json() == order
@@ -159,6 +166,7 @@ def test_unavailable_menu_item_prevents_checkout_and_keeps_cart(
     )
     assert update_response.status_code == 200
     assert update_response.json()["available"] is False
+    # Adding the now-unavailable item should fail while preserving the original cart.
     add_unavailable = client.post(
         "/customers/me/cart/items",
         headers=headers,
@@ -192,6 +200,7 @@ def test_cart_quantity_remove_clear_and_empty_checkout(
     assert updated.status_code == 200
     assert updated.json()["total"] == 16.2
 
+    # Removing the only item should leave an empty cart.
     removed = client.delete("/customers/me/cart/items/1111", headers=headers)
     assert removed.status_code == 200
     assert removed.json()["items"] == []
@@ -202,6 +211,7 @@ def test_cart_quantity_remove_clear_and_empty_checkout(
         json={"item_id": 1211, "quantity": 1},
     )
     cleared = client.delete("/customers/me/cart", headers=headers)
+    # Clearing a cart should also remove its restaurant restriction.
     assert cleared.status_code == 200
     assert cleared.json()["items"] == []
     assert cleared.json()["restaurant_id"] is None
@@ -229,6 +239,7 @@ def test_orders_are_not_visible_to_other_customers_and_openapi_documents_workflo
         f"/customers/me/orders/{order['id']}",
         headers=other_headers,
     )
+    # Another customer must receive not-found rather than access to the order.
     assert response.status_code == 404
 
     schema = client.get("/openapi.json").json()
