@@ -37,3 +37,9 @@ AI ASSISTED
 
 Added needed sample 1 line comments to the code for auth.py, customers.py , test_customer_workflow.py, customer-service.py, restaurant_service.py, schemas.py
 AI GENERATED 
+
+Added a test for cart preservation and checkout configuration.
+AI GENERATED 
+
+Asked for ideas on relevant user stories & refined pre-existing one for customers
+AI ASSISTED 
