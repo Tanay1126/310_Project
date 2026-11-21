@@ -276,5 +276,9 @@ def test_orders_are_not_visible_to_other_customers_and_openapi_documents_workflo
     assert response.status_code == 404
 
     schema = client.get("/openapi.json").json()
+    assert schema["info"]["version"] == "1.0.0"
+    assert schema["components"]["securitySchemes"]["BearerAuth"]["type"] == "http"
+    assert schema["components"]["securitySchemes"]["BearerAuth"]["scheme"] == "bearer"
+    assert "BearerAuth" in str(schema["paths"]["/customers/me/cart"]["get"]["security"])
     assert "/customers/me/checkout" in schema["paths"]
     assert "Revalidates the customer" in schema["paths"]["/customers/me/checkout"]["post"]["description"]
