@@ -10,6 +10,7 @@ class Restaurant(BaseModel):
 
 
 class RestaurantCreate(BaseModel):
+    # Creation schemas apply constraints and normalize required text before persistence.
     name: str = Field(min_length=1, max_length=100)
     cuisine: str | None = Field(default=None, max_length=100)
     description: str | None = Field(default=None, max_length=500)
@@ -96,6 +97,7 @@ class Menu(BaseModel):
 
 
 class CustomerCreate(BaseModel):
+    # Customer input is trimmed and email addresses are normalized consistently.
     name: str = Field(min_length=1, max_length=100)
     email: str = Field(min_length=3, max_length=254)
     password: str = Field(min_length=8, max_length=128)
@@ -119,6 +121,7 @@ class CustomerCreate(BaseModel):
 
 
 class CustomerLogin(BaseModel):
+    # Login normalization ensures email matching is case-insensitive.
     email: str
     password: str
 
@@ -132,6 +135,7 @@ class CustomerLogin(BaseModel):
 
 
 class CustomerUpdate(BaseModel):
+    # Update fields reject null values so optional fields cannot erase data accidentally.
     name: str | None = Field(default=None, min_length=1, max_length=100)
     email: str | None = Field(default=None, min_length=3, max_length=254)
     delivery_address: str | None = Field(default=None, min_length=1, max_length=500)
@@ -190,6 +194,7 @@ class CartLine(BaseModel):
 
 
 class Cart(BaseModel):
+    # The cart response exposes calculated totals as well as restaurant ownership.
     id: int
     customer_id: int
     restaurant_id: int | None = None

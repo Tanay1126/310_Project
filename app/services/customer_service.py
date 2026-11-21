@@ -21,12 +21,14 @@ class WorkflowError(Exception):
 
 
 def _public_customer(record: dict[str, Any]) -> Customer:
+    # Password fields are repository data and must not appear in API responses.
     return Customer.model_validate(
         {key: value for key, value in record.items() if not key.startswith("password_")}
     )
 
 
 def register_customer(customer: CustomerCreate) -> Customer:
+    # Reject duplicate emails before hashing and saving a new customer.
     if workflow_repository.get_customer_by_email(customer.email) is not None:
         raise WorkflowError("An account with this email already exists", 409)
     password_fields = hash_password(customer.password)
@@ -44,6 +46,7 @@ def register_customer(customer: CustomerCreate) -> Customer:
 
 
 def sign_in(email: str, password: str) -> tuple[str, Customer]:
+    # Authentication requires an active account and a matching password hash.
     record = workflow_repository.get_customer_by_email(email)
     if (
         record is None
@@ -58,6 +61,7 @@ def sign_in(email: str, password: str) -> tuple[str, Customer]:
 def update_customer(
     customer_id: int, changes: CustomerUpdate
 ) -> Customer:
+    # Only fields explicitly supplied in the update should be persisted.
     fields = changes.model_dump(exclude_unset=True)
     if "email" in fields:
         existing = workflow_repository.get_customer_by_email(fields["email"])
@@ -70,12 +74,14 @@ def update_customer(
 
 
 def deactivate_customer(customer_id: int) -> None:
+    # Deactivation preserves the account record while preventing future sign-in.
     record = workflow_repository.update_customer(customer_id, {"active": False})
     if record is None:
         raise WorkflowError("Customer not found", 404)
 
 
 def _get_or_create_cart(customer_id: int) -> dict[str, Any]:
+    # Customers receive an empty cart automatically on their first cart operation.
     cart = workflow_repository.get_cart(customer_id)
     if cart is not None:
         return cart
@@ -85,10 +91,12 @@ def _get_or_create_cart(customer_id: int) -> dict[str, Any]:
 
 
 def _money(value: float) -> float:
+    # Round every monetary calculation consistently to two decimal places.
     return float(Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
 def get_cart(customer_id: int) -> Cart:
+    # Rebuild cart lines from current menu records rather than cached prices.
     cart = _get_or_create_cart(customer_id)
     lines: list[CartLine] = []
     for entry in cart["items"]:
@@ -118,6 +126,7 @@ def get_cart(customer_id: int) -> Cart:
 
 
 def add_cart_item(customer_id: int, item_id: int, quantity: int) -> Cart:
+    # Validate menu availability and restaurant ownership before changing the cart.
     context = get_menu_item_context(item_id)
     if context is None:
         raise WorkflowError("Menu item not found", 404)
@@ -131,6 +140,7 @@ def add_cart_item(customer_id: int, item_id: int, quantity: int) -> Cart:
         (entry for entry in cart["items"] if entry["item_id"] == item_id),
         None,
     )
+    # Merge the quantity into an existing line instead of duplicating it.
     if existing is not None:
         if existing["quantity"] + quantity > 99:
             raise WorkflowError("Item quantity cannot exceed 99", 422)
@@ -156,6 +166,7 @@ def update_cart_item(customer_id: int, item_id: int, quantity: int) -> Cart:
 
 
 def remove_cart_item(customer_id: int, item_id: int) -> Cart:
+    # Clearing the final item also releases the cart's restaurant restriction.
     cart = _get_or_create_cart(customer_id)
     remaining = [entry for entry in cart["items"] if entry["item_id"] != item_id]
     if len(remaining) == len(cart["items"]):
@@ -176,6 +187,7 @@ def clear_cart(customer_id: int) -> Cart:
 
 
 def checkout(customer: Customer) -> Order:
+    # Revalidate the cart and current menu before persisting an order snapshot.
     cart = _get_or_create_cart(customer.id)
     if not cart["items"]:
         raise WorkflowError("Cannot check out an empty cart", 409)
@@ -203,6 +215,7 @@ def checkout(customer: Customer) -> Order:
             )
         )
     subtotal = _money(sum(line.line_total for line in lines))
+    # Persist a snapshot of names and prices before clearing the customer's cart.
     order_record = workflow_repository.create_order(
         {
             "customer_id": customer.id,
