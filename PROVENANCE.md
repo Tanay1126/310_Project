@@ -34,3 +34,6 @@ AI ASSISTED
 
 Implemented customer oriented test cases as reference for actual testing. 
 AI ASSISTED
+
+Added needed sample 1 line comments to the code for auth.py, customers.py , test_customer_workflow.py, customer-service.py, restaurant_service.py, schemas.py
+AI GENERATED 

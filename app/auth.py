@@ -20,6 +20,7 @@ _bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def hash_password(password: str) -> dict[str, str | int]:
+    # Use a unique random salt for each password before deriving the hash.
     salt = secrets.token_bytes(16)
     digest = hashlib.pbkdf2_hmac(
         "sha256", password.encode("utf-8"), salt, _PASSWORD_ITERATIONS
@@ -32,6 +33,7 @@ def hash_password(password: str) -> dict[str, str | int]:
 
 
 def verify_password(password: str, customer: dict[str, Any]) -> bool:
+    # Derive the candidate hash with the customer's stored salt and iteration count.
     salt = base64.urlsafe_b64decode(customer["password_salt"])
     expected = base64.urlsafe_b64decode(customer["password_hash"])
     digest = hashlib.pbkdf2_hmac(
@@ -44,6 +46,7 @@ def verify_password(password: str, customer: dict[str, Any]) -> bool:
 
 
 def create_access_token(customer_id: int, role: str) -> str:
+    # Encode a short-lived bearer payload and sign it with the server secret.
     payload = json.dumps(
         {"sub": customer_id, "role": role, "exp": int(time.time()) + _TOKEN_TTL_SECONDS},
         separators=(",", ":"),
@@ -58,6 +61,7 @@ def create_access_token(customer_id: int, role: str) -> str:
 
 def _decode_access_token(token: str) -> dict[str, Any]:
     try:
+        # Verify the signature before trusting any claims in the payload.
         encoded_payload, encoded_signature = token.split(".", maxsplit=1)
         signature = base64.urlsafe_b64decode(
             encoded_signature + "=" * (-len(encoded_signature) % 4)
@@ -85,6 +89,7 @@ def _decode_access_token(token: str) -> dict[str, Any]:
 def get_current_customer(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
 ) -> Customer:
+    # Require a valid customer bearer token and an available matching account.
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

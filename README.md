@@ -26,7 +26,7 @@ source .venv/bin/activate
 Dependency installation:
 From the repository root, with the virtual enviroment active:
 
-pip install fastapi pytest uvicorn
+pip install -r requirements.txt
 
 
 Run the application:

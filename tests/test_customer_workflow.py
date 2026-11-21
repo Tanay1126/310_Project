@@ -15,7 +15,7 @@ client = TestClient(app)
 def isolated_workflow_data(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Redirect all repositories to copies of their data for test isolation.
+    # Copy repository data into temporary files so tests do not alter source fixtures.
     source_data = Path(__file__).resolve().parents[1] / "data"
     for repository, field, filename in (
         (repositories.restaurant_repository, "restaurant_file", "restaurants.json"),
@@ -32,7 +32,7 @@ def isolated_workflow_data(
 
 
 def register_customer(email: str = "customer@example.com") -> dict:
-    # Register a customer through the API and return the created record.
+    # Create a customer through the public API for workflow test setup.
     response = client.post(
         "/customers/",
         json={
@@ -47,7 +47,7 @@ def register_customer(email: str = "customer@example.com") -> dict:
 
 
 def sign_in(email: str = "customer@example.com") -> str:
-    # Sign in through the API and return a bearer token for protected requests.
+    # Sign in through the API and return the bearer token for authenticated requests.
     response = client.post(
         "/customers/login",
         json={"email": email, "password": "CorrectHorse123"},
@@ -59,7 +59,7 @@ def sign_in(email: str = "customer@example.com") -> str:
 def test_registration_authentication_and_customer_ownership(
     isolated_workflow_data: None,
 ) -> None:
-    # Verify unauthenticated access is denied before account registration.
+    # Verify registration, authentication, ownership, updates, and deactivation.
     response = client.get("/customers/me/cart")
     assert response.status_code == 401
 
@@ -107,7 +107,7 @@ def test_registration_authentication_and_customer_ownership(
 def test_cart_checkout_recalculates_prices_and_preserves_order_snapshot(
     isolated_workflow_data: None,
 ) -> None:
-    # Verify cart totals, restaurant restrictions, and checkout price snapshots.
+    # Confirm checkout uses current prices and stores customer and order details.
     register_customer()
     headers = {"Authorization": f"Bearer {sign_in()}"}
 
@@ -151,7 +151,7 @@ def test_cart_checkout_recalculates_prices_and_preserves_order_snapshot(
 def test_unavailable_menu_item_prevents_checkout_and_keeps_cart(
     isolated_workflow_data: None,
 ) -> None:
-    # Verify unavailable items cannot be re-added or checked out.
+    # An unavailable item should block checkout without clearing the cart.
     register_customer()
     headers = {"Authorization": f"Bearer {sign_in()}"}
     client.post(
@@ -183,7 +183,7 @@ def test_unavailable_menu_item_prevents_checkout_and_keeps_cart(
 def test_cart_quantity_remove_clear_and_empty_checkout(
     isolated_workflow_data: None,
 ) -> None:
-    # Cover quantity updates, item removal, cart clearing, and empty checkout.
+    # Cover cart quantity changes, removal, clearing, and empty checkout rejection.
     register_customer()
     headers = {"Authorization": f"Bearer {sign_in()}"}
     client.post(
@@ -223,7 +223,7 @@ def test_cart_quantity_remove_clear_and_empty_checkout(
 def test_orders_are_not_visible_to_other_customers_and_openapi_documents_workflow(
     isolated_workflow_data: None,
 ) -> None:
-    # Verify order ownership and that checkout is documented in OpenAPI.
+    # Verify cross-customer isolation and OpenAPI exposure of the checkout workflow.
     register_customer()
     owner_headers = {"Authorization": f"Bearer {sign_in()}"}
     client.post(

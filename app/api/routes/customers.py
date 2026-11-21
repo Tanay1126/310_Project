@@ -20,6 +20,7 @@ router = APIRouter(prefix="/customers", tags=["customers"])
 
 
 def _handle_workflow_error(error: WorkflowError) -> HTTPException:
+    # Translate service workflow failures into consistent API responses.
     return HTTPException(status_code=error.status_code, detail=str(error))
 
 
@@ -32,6 +33,7 @@ def _handle_workflow_error(error: WorkflowError) -> HTTPException:
     responses={409: {"description": "Email address is already registered"}},
 )
 def register_customer(customer: CustomerCreate) -> Customer:
+    # Delegate account creation and return a public customer representation.
     try:
         return customer_service.register_customer(customer)
     except WorkflowError as error:
@@ -46,6 +48,7 @@ def register_customer(customer: CustomerCreate) -> Customer:
     responses={401: {"description": "Invalid email or password"}},
 )
 def login_customer(credentials: CustomerLogin) -> AuthToken:
+    # A successful sign-in returns both the bearer token and customer identity.
     try:
         token, customer = customer_service.sign_in(
             credentials.email, credentials.password
@@ -99,6 +102,7 @@ def deactivate_customer(customer: Customer = Depends(get_current_customer)) -> R
     responses={401: {"description": "Authentication required"}},
 )
 def read_cart(customer: Customer = Depends(get_current_customer)) -> Cart:
+    # The service creates the customer's active cart when it does not exist.
     return customer_service.get_cart(customer.id)
 
 
@@ -186,6 +190,7 @@ def delete_cart(customer: Customer = Depends(get_current_customer)) -> Cart:
 def create_order(
     customer: Customer = Depends(get_current_customer),
 ) -> Order:
+    # Checkout revalidates the cart and only clears it after order persistence.
     try:
         return customer_service.checkout(customer)
     except WorkflowError as error:
